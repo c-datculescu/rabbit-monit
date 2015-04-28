@@ -1,0 +1,14 @@
+{{define "queue"}}
+<li class="list-group-item" role="presentation">
+    {{.QueueInfo.Name}}
+    <span class="label label-{{ if .AlertState }}danger{{else}}success{{end}}">{{.QueueInfo.State}}</span>
+    <span class="label label-{{if .AlertNonDurable }}success{{else}}danger{{end}}">{{ if .QueueInfo.Durable}}D{{end}}{{ if .QueueInfo.AutoDelete}}Ad{{end}}</span>
+    <span class="label label-{{if .AlertRdy}}danger{{else}}success{{end}}">{{.QueueInfo.MessagesReady}} RDY</span>
+    <span class="label label-{{if .AlertUnack }}danger{{else}}success{{end}}">{{.QueueInfo.MessagesUnacknowledged}} UNACK</span>
+    <span class="label label-{{if .AlertListener}}danger{{else}}success{{end}}">{{.QueueInfo.Consumers}} Listen</span>
+    <span class="label label-{{if .AlertUtilization}}danger{{else}}success{{end}}">{{.QueueInfo.ConsumerUtilisation}} UTIL</span>
+    <span class="label label-{{if .AlertIntake}}danger{{else}}success{{end}}">{{.QueueInfo.MessagesReadyDetails.Rate}} IN</span>
+    <span class="label label-{{if .AlertNonDurableMessages}}danger{{else}}success{{end}}">{{.NonPersistentMessages}} TRANS MSG</span>
+    <span class="label label-info">{{.QueueInfo.Vhost}}</span>
+</li>
+{{end}}

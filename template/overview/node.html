@@ -1,0 +1,20 @@
+{{define "node"}}
+                            <li class="list-group-item" role="presentation">
+                            <h4>{{.NodeInfo.Name}}</h4>
+                                <p>
+                                    <span class="label label-success" title="Node status">up</span>
+                                    <span class="label-success label" title="Disk percentage">HDD {{.DiskPercentage}}%</span>
+                                    <span class="label label-success" title="Memory percentage">MEM {{.MemPercentage}}%</span>
+                                    <span class="label label-danger" title="File descriptors percentage">FD {{.FdPercentage}}%</span>
+                                </p>
+                                <p>
+                                    <span class="label label-danger" title="Erlang processes percentage">ERLPR {{.ErlProcPercentage}}%</span>
+                                    <span class="label label-danger" title="Sockets percemtage">SOCK {{.SockPercentage}}%</span>
+                                </p>
+                                <p>
+                                {{ range .NodeInfo.EnabledPlugins }}
+                                    <span class="label label-info">{{.}}</span>
+                                {{ end }}
+                                </p>
+                            </li>
+{{end}}
