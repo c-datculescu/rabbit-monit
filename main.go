@@ -1,4 +1,4 @@
-package main
+package rabbitmonit
 
 import (
 	"cdatculescu/rabbit-dashboard"
