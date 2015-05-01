@@ -1,14 +1,15 @@
 {{define "queue"}}
 <li class="list-group-item" role="presentation">
-    {{.QueueInfo.Name}}
-    <span class="label label-{{ if .AlertState }}danger{{else}}success{{end}}">{{.QueueInfo.State}}</span>
-    <span class="label label-{{if .AlertNonDurable }}success{{else}}danger{{end}}">{{ if .QueueInfo.Durable}}D{{end}}{{ if .QueueInfo.AutoDelete}}Ad{{end}}</span>
-    <span class="label label-{{if .AlertRdy}}danger{{else}}success{{end}}">{{.QueueInfo.MessagesReady}} RDY</span>
-    <span class="label label-{{if .AlertUnack }}danger{{else}}success{{end}}">{{.QueueInfo.MessagesUnacknowledged}} UNACK</span>
-    <span class="label label-{{if .AlertListener}}danger{{else}}success{{end}}">{{.QueueInfo.Consumers}} Listen</span>
-    <span class="label label-{{if .AlertUtilization}}danger{{else}}success{{end}}">{{.QueueInfo.ConsumerUtilisation}} UTIL</span>
-    <span class="label label-{{if .AlertIntake}}danger{{else}}success{{end}}">{{.QueueInfo.MessagesReadyDetails.Rate}} IN</span>
-    <span class="label label-{{if .AlertNonDurableMessages}}danger{{else}}success{{end}}">{{.NonPersistentMessages}} TRANS MSG</span>
+    <a href="/vhost/{{ .QueueInfo.Vhost | urlquery }}">{{.QueueInfo.Vhost}}</a>::<a href="/queue/{{ .QueueInfo.Vhost | urlquery }}/{{ .QueueInfo.Name | urlquery }}">{{.QueueInfo.Name}}</a>
+    <br><br>
+    <span class="label label-{{ if eq .AlertRdy 1 }}danger{{ else if eq .AlertRdy 2 }}warning{{ else }}info{{ end }}">{{ .QueueInfo.MessagesRdy }} RDY</span>
+    <span class="label label-info">{{.QueueInfo.MessagesUnack}} UNACK</span>
+    <span class="label label-{{ if eq .AlertNonDurableMessages 1 }}danger{{ else }}info{{ end }}">{{ .NonPersistentMessages }} TRANS MSG</span>
+    <span class="label label-{{ if eq .AlertState 1 }}danger{{ else }}info{{ end }}">{{ .QueueInfo.State }}</span>
+    <span class="label label-{{ if eq .AlertListener 1 }}danger{{ else }}info{{ end }}">{{ .QueueInfo.Consumers }} Listen</span>
+    <span class="label label-{{ if eq .AlertNonDurable 1 }}danger{{ else }}info{{ end }}">{{ if .QueueInfo.Durable}}D{{else}}ND{{end}}{{ if .QueueInfo.AutoDelete}}Ad{{end}}</span>
+    <span class="label label-{{ if eq .AlertUtilization 1 }}danger{{ else if eq .AlertUtilization 2 }}warning{{else}}info{{end}}">{{.QueueInfo.ConsumerUtilisation}} UTIL</span>
+    <span class="label label-{{ if eq .AlertIntake 1 }}danger{{else}}info{{end}}">{{.QueueInfo.MessagesRdyDetails.Rate}} IN</span>
     <span class="label label-info">{{.QueueInfo.Vhost}}</span>
 </li>
 {{end}}
