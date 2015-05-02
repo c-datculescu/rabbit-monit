@@ -83,6 +83,7 @@ func (p *Ops) AccumulationQueues() []QueueProperties {
 
 	for _, queue := range queues {
 		extQueue := new(QueueProperties)
+		extQueue.Client = client
 		extQueue.QueueInfo = queue
 		extQueue.Calculate()
 
@@ -107,6 +108,7 @@ func (p *Ops) Queue(vhost, queue string) QueueProperties {
 
 	retQueue := &QueueProperties{
 		QueueInfo: *queueDetail,
+		Client:    client,
 	}
 
 	retQueue.Calculate()
