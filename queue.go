@@ -37,6 +37,7 @@ type QueueAlert struct {
 	Utilisation   bool // the consumer utilisation. < 70 = warning, < 30 = error
 	Intake        bool // the diff between in and out. ∑ in, out > 1 = warning
 	NonDurableMsg bool // the number of non-durable messages. will be true if the number of non-durable messages > 1
+	Has           bool // identifies whether we have errors/warnings at all
 }
 
 /*
@@ -48,21 +49,23 @@ func (qp *QueueProperties) Calculate() {
 	qp.Error = QueueAlert{}
 	qp.Warning = QueueAlert{}
 
-	qp.alertState()
-	qp.alertDurable()
-	qp.alertRdy()
-	qp.alertListener()
-	qp.alertUtilisation()
-	qp.alertIntake()
-	qp.alertNonDurableMessages()
-	qp.alertUnackMessages()
+	qp.alertState().
+		alertDurable().
+		alertRdy().
+		alertListener().
+		alertUtilisation().
+		alertIntake().
+		alertNonDurableMessages().
+		alertUnackMessages()
 }
 
 func (qp *QueueProperties) alertRdy() *QueueProperties {
 	if qp.QueueInfo.MessagesRdy > 100 {
 		qp.Error.Rdy = true
+		qp.Error.Has = true
 	} else if qp.QueueInfo.MessagesRdy > 0 {
 		qp.Warning.Rdy = true
+		qp.Warning.Has = true
 	}
 	return qp
 }
@@ -70,7 +73,9 @@ func (qp *QueueProperties) alertRdy() *QueueProperties {
 func (qp *QueueProperties) alertListener() *QueueProperties {
 	if qp.QueueInfo.Consumers == 0 && qp.QueueInfo.MessagesRdy > 0 {
 		qp.Error.Listener = true
+		qp.Error.Has = true
 	} else if qp.QueueInfo.Consumers <= 3 && qp.QueueInfo.MessagesRdy > 0 {
+		qp.Warning.Has = true
 		qp.Warning.Listener = true
 	}
 	return qp
@@ -89,8 +94,10 @@ func (qp *QueueProperties) alertUtilisation() *QueueProperties {
 	}
 
 	if consumerUtilisation < 30 && qp.QueueInfo.MessagesRdy > 0 {
+		qp.Error.Has = true
 		qp.Error.Utilisation = true
 	} else if consumerUtilisation < 70 && qp.QueueInfo.MessagesRdy > 0 {
+		qp.Warning.Has = true
 		qp.Warning.Utilisation = true
 	}
 	return qp
@@ -98,6 +105,7 @@ func (qp *QueueProperties) alertUtilisation() *QueueProperties {
 
 func (qp *QueueProperties) alertIntake() *QueueProperties {
 	if qp.QueueInfo.MessagesRdyDetails.Rate > 1 {
+		qp.Error.Has = true
 		qp.Warning.Intake = true
 	}
 	return qp
@@ -106,6 +114,7 @@ func (qp *QueueProperties) alertIntake() *QueueProperties {
 func (qp *QueueProperties) alertNonDurableMessages() *QueueProperties {
 	qp.Stats.NonPersistentMessagesCount = qp.QueueInfo.MessagesRam - qp.QueueInfo.MessagesPersistent
 	if qp.Stats.NonPersistentMessagesCount > 0 {
+		qp.Error.Has = true
 		qp.Error.NonDurableMsg = true
 	}
 	return qp
@@ -124,6 +133,7 @@ func (qp *QueueProperties) alertUnackMessages() *QueueProperties {
 	}
 
 	if qp.QueueInfo.MessagesUnack > total {
+		qp.Error.Has = true
 		qp.Error.Unack = true
 	}
 	return qp
@@ -131,6 +141,7 @@ func (qp *QueueProperties) alertUnackMessages() *QueueProperties {
 
 func (qp *QueueProperties) alertState() *QueueProperties {
 	if qp.QueueInfo.State != "running" {
+		qp.Error.Has = true
 		qp.Error.State = true
 	}
 	return qp
@@ -138,6 +149,7 @@ func (qp *QueueProperties) alertState() *QueueProperties {
 
 func (qp *QueueProperties) alertDurable() *QueueProperties {
 	if !qp.QueueInfo.Durable {
+		qp.Error.Has = true
 		qp.Error.NonDurable = true
 	}
 	return qp

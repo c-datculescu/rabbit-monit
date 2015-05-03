@@ -31,7 +31,7 @@ Vhost is a small indirection which returns a vhost
 */
 func (p *Ops) Vhost(vhost string) rabbithole.VhostInfo {
 	client := p.client()
-	vhostRet, err := client.GetVhost("/" + vhost)
+	vhostRet, err := client.GetVhost(vhost)
 
 	if err != nil {
 		panic(err.Error())
@@ -101,7 +101,7 @@ queue returns details about a queue from the api
 */
 func (p *Ops) Queue(vhost, queue string) QueueProperties {
 	client := p.client()
-	queueDetail, err := client.GetQueue("/"+vhost, queue)
+	queueDetail, err := client.GetQueue(vhost, queue)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -120,7 +120,7 @@ queues returns all the queues from a vhost along with detailed information about
 */
 func (p *Ops) Queues(vhost string) []QueueProperties {
 	client := p.client()
-	queues, err := client.ListQueuesIn("/" + vhost)
+	queues, err := client.ListQueuesIn(vhost)
 	if err != nil {
 		panic(err.Error())
 	}

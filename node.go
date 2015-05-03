@@ -23,7 +23,7 @@ type NodeStat struct {
 	DiskUsedPercentage float64 // percentage of disk used until alarm limit
 	MemUsedPercentage  float64 // percentage of memory used
 	ErlUsedPercentage  float64 // percentage of erlang processes used
-	SockUsedpercentage float64 // percentage of sockets used
+	SockUsedPercentage float64 // percentage of sockets used
 }
 
 /*
@@ -65,7 +65,7 @@ func (np *NodeProperties) statsErl() *NodeProperties {
 
 func (np *NodeProperties) statsSock() *NodeProperties {
 	res := (float64(np.NodeInfo.SocketsUsed) / float64(np.NodeInfo.SocketsTotal)) * 100
-	np.Stats.SockUsedpercentage = roundPlus(float64(res), 2)
+	np.Stats.SockUsedPercentage = roundPlus(float64(res), 2)
 	return np
 }
 
@@ -107,9 +107,9 @@ func (np *NodeProperties) alertHdd() *NodeProperties {
 }
 
 func (np *NodeProperties) alertSock() *NodeProperties {
-	if np.Stats.SockUsedpercentage > 90 {
+	if np.Stats.SockUsedPercentage > 90 {
 		np.Error.Sock = true
-	} else if np.Stats.SockUsedpercentage > 80 {
+	} else if np.Stats.SockUsedPercentage > 80 {
 		np.Warning.Sock = true
 	}
 	return np
