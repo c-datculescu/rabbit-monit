@@ -78,9 +78,6 @@ func (p *Ops) AccumulationQueues() []QueueProperties {
 		panic(err.Error())
 	}
 
-	qs := &queueSorter{}
-	qs.Sort(queues)
-
 	for _, queue := range queues {
 		extQueue := new(QueueProperties)
 		extQueue.Client = client
@@ -88,10 +85,10 @@ func (p *Ops) AccumulationQueues() []QueueProperties {
 		extQueue.Calculate()
 
 		mapExtendedQueues = append(mapExtendedQueues, *extQueue)
-		if len(mapExtendedQueues) == 10 {
-			break
-		}
 	}
+
+	qs := &queueSorter{}
+	qs.Sort(mapExtendedQueues)
 
 	return mapExtendedQueues
 }
@@ -143,11 +140,11 @@ func (p *Ops) Queues(vhost string) []QueueProperties {
 queueSorter is used to sort a list of queues based on the number of messages accumulated
 */
 type queueSorter struct {
-	queues []rabbithole.QueueInfo
+	queues []QueueProperties
 	less   []lessFunc
 }
 
-func (qs *queueSorter) Sort(queues []rabbithole.QueueInfo) {
+func (qs *queueSorter) Sort(queues []QueueProperties) {
 	qs.queues = queues
 	sort.Sort(qs)
 }
@@ -162,12 +159,19 @@ func (qs *queueSorter) Swap(i, j int) {
 
 func (qs *queueSorter) Less(i, j int) bool {
 	first, second := &qs.queues[i], &qs.queues[j]
-	if first.MessagesRdy > second.MessagesRdy {
-		return true
+
+	var firstValue, secondValue = 1, 1
+
+	if first.Error.Has {
+		firstValue = 4
+	} else if first.Warning.Has {
+		firstValue = 2
 	}
 
-	if first.MessagesRdy == second.MessagesRdy {
-		return true
+	if second.Error.Has {
+		secondValue = 4
+	} else if second.Warning.Has {
+		secondValue = 2
 	}
 
 	return false
