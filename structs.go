@@ -174,5 +174,9 @@ func (qs *queueSorter) Less(i, j int) bool {
 		secondValue = 2
 	}
 
+	if firstValue > secondValue {
+		return true
+	}
+
 	return false
 }
