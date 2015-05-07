@@ -41,31 +41,31 @@ type NodeAlert struct {
 
 func (np *NodeProperties) statsFd() *NodeProperties {
 	res := (float64(np.NodeInfo.FdUsed) / float64(np.NodeInfo.FdTotal)) * 100
-	np.Stats.FdUsedPercentage = float64(roundPlus(res, 2))
+	np.Stats.FdUsedPercentage = float64(RoundPlus(res, 2))
 	return np
 }
 
 func (np *NodeProperties) statsDisk() *NodeProperties {
 	res := (float64(np.NodeInfo.DiskFreeLimit) / float64(np.NodeInfo.DiskFree)) * 100
-	np.Stats.DiskUsedPercentage = float64(roundPlus(res, 2))
+	np.Stats.DiskUsedPercentage = float64(RoundPlus(res, 2))
 	return np
 }
 
 func (np *NodeProperties) statsMem() *NodeProperties {
 	res := (float64(np.NodeInfo.MemUsed) / float64(np.NodeInfo.MemLimit)) * 100
-	np.Stats.MemUsedPercentage = float64(roundPlus(res, 2))
+	np.Stats.MemUsedPercentage = float64(RoundPlus(res, 2))
 	return np
 }
 
 func (np *NodeProperties) statsErl() *NodeProperties {
 	res := (float64(np.NodeInfo.ProcUsed) / float64(np.NodeInfo.ProcTotal)) * 100
-	np.Stats.ErlUsedPercentage = float64(roundPlus(res, 2))
+	np.Stats.ErlUsedPercentage = float64(RoundPlus(res, 2))
 	return np
 }
 
 func (np *NodeProperties) statsSock() *NodeProperties {
 	res := (float64(np.NodeInfo.SocketsUsed) / float64(np.NodeInfo.SocketsTotal)) * 100
-	np.Stats.SockUsedPercentage = roundPlus(float64(res), 2)
+	np.Stats.SockUsedPercentage = RoundPlus(float64(res), 2)
 	return np
 }
 

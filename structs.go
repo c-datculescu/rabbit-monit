@@ -133,6 +133,9 @@ func (p *Ops) Queues(vhost string) []QueueProperties {
 		mapExtendedQueues = append(mapExtendedQueues, *extQueue)
 	}
 
+	qs := &queueSorter{}
+	qs.Sort(mapExtendedQueues)
+
 	return mapExtendedQueues
 }
 
@@ -174,7 +177,7 @@ func (qs *queueSorter) Less(i, j int) bool {
 		secondValue = 2
 	}
 
-	if firstValue > secondValue {
+	if firstValue > secondValue || first.QueueInfo.MessagesRdy > second.QueueInfo.MessagesRdy {
 		return true
 	}
 
