@@ -26,6 +26,30 @@ func (p *Ops) client() *rabbithole.Client {
 	return client
 }
 
+func (p *Ops) Vhosts() []VhostProperties {
+	client := p.client()
+	vhostsRet, err := client.ListVhosts()
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	mapVhosts := make([]VhostProperties, 0)
+
+	for _, vhost := range vhostsRet {
+		vh := &VhostProperties{
+			VhostInfo: vhost,
+		}
+		vh.Calculate()
+		mapVhosts = append(mapVhosts, *vh)
+	}
+
+	vs := &vhostSorter{}
+	vs.Sort(mapVhosts)
+
+	return mapVhosts
+}
+
 /*
 Vhost is a small indirection which returns a vhost
 */
@@ -137,6 +161,48 @@ func (p *Ops) Queues(vhost string) []QueueProperties {
 	qs.Sort(mapExtendedQueues)
 
 	return mapExtendedQueues
+}
+
+type vhostSorter struct {
+	vhosts []VhostProperties
+	less   []lessFunc
+}
+
+func (vs *vhostSorter) Sort(vhosts []VhostProperties) {
+	vs.vhosts = vhosts
+	sort.Sort(vs)
+}
+
+func (vs *vhostSorter) Len() int {
+	return len(vs.vhosts)
+}
+
+func (vs *vhostSorter) Swap(i, j int) {
+	vs.vhosts[i], vs.vhosts[j] = vs.vhosts[j], vs.vhosts[i]
+}
+
+func (vs *vhostSorter) Less(i, j int) bool {
+	first, second := &vs.vhosts[i], &vs.vhosts[j]
+
+	var firstValue, secondValue = 1, 1
+
+	if first.Error.Has {
+		firstValue = 4
+	} else if first.Warning.Has {
+		firstValue = 2
+	}
+
+	if second.Error.Has {
+		secondValue = 4
+	} else if second.Warning.Has {
+		secondValue = 2
+	}
+
+	if firstValue > secondValue || first.VhostInfo.MessagesRdy > second.VhostInfo.MessagesRdy {
+		return true
+	}
+
+	return false
 }
 
 /*
