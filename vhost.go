@@ -44,7 +44,9 @@ func (vp *VhostProperties) Calculate() {
 
 /*
 alertRdy raises an alert/warning when messages ready exceed a certain limit
+
 threshold for alert is 1000
+
 threshold for warning is 0
 */
 func (vp *VhostProperties) alertRdy() *VhostProperties {
@@ -61,7 +63,9 @@ func (vp *VhostProperties) alertRdy() *VhostProperties {
 
 /*
 alertConsumptionLow raises an alert/warning when consumption rate vs ingestion rate exceeds certain values
+
 threshold for alert is rate difference bigger than 10 and consuption is less than publishing
+
 threshold for alert is rate difference bigger than 5 and consuption is less than publishing
 */
 func (vp *VhostProperties) alertConsumptionLow() *VhostProperties {

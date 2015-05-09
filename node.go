@@ -14,6 +14,7 @@ type NodeProperties struct {
 
 /*
 NodeStat Holds all the relevant node statistics.
+
 @todo add more statistics in the future as well as warnings
 */
 type NodeStat struct {
@@ -26,6 +27,7 @@ type NodeStat struct {
 
 /*
 NodeAlert holds all the needed alerts for critical issues related to the current node
+
 @todo identify other alerts which might be relevant
 */
 type NodeAlert struct {
@@ -84,7 +86,9 @@ func (np *NodeProperties) statsSock() *NodeProperties {
 
 /*
 alertFd calculates whether it should raise an alert or a warning for file descriptors
+
 if file descriptors are over 90% than an alert is raised
+
 if file descriptors are over 80% a warning gets raised
 */
 func (np *NodeProperties) alertFd() *NodeProperties {
@@ -98,7 +102,9 @@ func (np *NodeProperties) alertFd() *NodeProperties {
 
 /*
 alertErl caulculates whetger it should raise an alert or a warning for erlang processes availability
+
 if erlang processes are over 90% it raises an alert
+
 if erlang processes are over 80% it raises a warning
 */
 func (np *NodeProperties) alertErl() *NodeProperties {
@@ -112,7 +118,9 @@ func (np *NodeProperties) alertErl() *NodeProperties {
 
 /*
 alertMem calculates whether it should raise an alert or a warning for memory approaching the alert threshold
+
 if memory is over 90% an alert is raised
+
 if memory is over 85% a warning is raised
 */
 func (np *NodeProperties) alertMem() *NodeProperties {
@@ -127,7 +135,9 @@ func (np *NodeProperties) alertMem() *NodeProperties {
 
 /*
 alertHdd calculates whether there should be an alert or a warning for disk space approaching the alerting threshold
+
 if disk space is over 90% an alert is raised
+
 if disk space is over 80% an warning is raised
 */
 func (np *NodeProperties) alertHdd() *NodeProperties {
@@ -141,7 +151,9 @@ func (np *NodeProperties) alertHdd() *NodeProperties {
 
 /*
 alertSock calculates whetjer there should be an alert or a warning for socket exhaustion
+
 if socket consumption is 90% or over an alert is raised
+
 if socket consumption is 80% or over a warning is raised
 */
 func (np *NodeProperties) alertSock() *NodeProperties {
@@ -155,6 +167,7 @@ func (np *NodeProperties) alertSock() *NodeProperties {
 
 /*
 alertStatus calculates whether there should be an alert for status of the node
+
 if the node status is other than running, an alert will be raised
 */
 func (np *NodeProperties) alertStatus() *NodeProperties {
@@ -166,7 +179,7 @@ func (np *NodeProperties) alertStatus() *NodeProperties {
 
 /*
 Calculate performs various calculations and alerts discovery on top of the current node
-also runs all the stats/alert calculation functions
+and also runs all the stats/alert calculation functions
 */
 func (np *NodeProperties) Calculate() {
 	np.statsFd().

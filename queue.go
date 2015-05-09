@@ -62,7 +62,9 @@ func (qp *QueueProperties) Calculate() {
 /*
 alertRdy calculates whether it should raise an alert or warning when there are messages in the queue that are in
 ready status
+
 threshold for warnings is 0
+
 threshold for error is 100
 */
 func (qp *QueueProperties) alertRdy() *QueueProperties {
@@ -79,7 +81,9 @@ func (qp *QueueProperties) alertRdy() *QueueProperties {
 /*
 alertListener calculates whether there should be an alert/warning raised for the number of listeners on the current
 queue
+
 threshold for alert is 0 listeners and more than 0 ready messages
+
 threshold for warning is 3 listeners and more than 0 ready messages
 */
 func (qp *QueueProperties) alertListener() *QueueProperties {
@@ -96,8 +100,11 @@ func (qp *QueueProperties) alertListener() *QueueProperties {
 /*
 alertUtilisation calculates whether there should be an alert/warning raised for the utilisation on the current queue
 utilisation is important to give an overview of how many messages end up being dispatched
+
 utlisation is only usable though for high traffic queues
+
 threshold for alert is utilisation less than 30 and more than 0 messages ready in the queue
+
 threshold for warning is utilisation less than 70 and messages ready in the queue
 */
 func (qp *QueueProperties) alertUtilisation() *QueueProperties {
@@ -124,6 +131,7 @@ func (qp *QueueProperties) alertUtilisation() *QueueProperties {
 
 /*
 alertIntake should be deprecated and replaced by a diff between enqueue rate and dequeue rate
+
 @todo replace intake alert with enqueue/dequeue rate difference
 */
 func (qp *QueueProperties) alertIntake() *QueueProperties {
@@ -136,6 +144,7 @@ func (qp *QueueProperties) alertIntake() *QueueProperties {
 
 /*
 alertNonDurableMessages raises an alert if the queue contains non-durable messages.
+
 non-durable messages can be lost on a server restart
 */
 func (qp *QueueProperties) alertNonDurableMessages() *QueueProperties {
@@ -149,6 +158,7 @@ func (qp *QueueProperties) alertNonDurableMessages() *QueueProperties {
 
 /*
 alertUnackMessages raises an alert by analysing individual properties of consumers on queue as well as unack messages
+
 the threshold for alert is sum of consumer prefetch count is lower than the number of unack messages in the queue
 */
 func (qp *QueueProperties) alertUnackMessages() *QueueProperties {
