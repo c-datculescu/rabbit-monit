@@ -8,6 +8,9 @@ import (
 
 type lessFunc func(p1, p2 *rabbithole.QueueInfo) bool
 
+/*
+Ops is the main structure for monitoring operations over a rabbitmq cluster
+*/
 type Ops struct {
 	Host     string // the host to connect including the port
 	Login    string // the username that allows us to retrieve statistics
@@ -26,6 +29,9 @@ func (p *Ops) client() *rabbithole.Client {
 	return client
 }
 
+/*
+Vhosts returns a list of all vhosts in the current cluster and sorts them by warnings/errors
+*/
 func (p *Ops) Vhosts() []VhostProperties {
 	client := p.client()
 	vhostsRet, err := client.ListVhosts()
@@ -34,7 +40,7 @@ func (p *Ops) Vhosts() []VhostProperties {
 		panic(err.Error())
 	}
 
-	mapVhosts := make([]VhostProperties, 0)
+	var mapVhosts []VhostProperties
 
 	for _, vhost := range vhostsRet {
 		vh := &VhostProperties{
@@ -95,7 +101,7 @@ cluster health
 func (p *Ops) AccumulationQueues() []QueueProperties {
 	client := p.client()
 
-	mapExtendedQueues := make([]QueueProperties, 0)
+	var mapExtendedQueues []QueueProperties
 
 	queues, err := client.ListQueues()
 	if err != nil {
@@ -118,7 +124,7 @@ func (p *Ops) AccumulationQueues() []QueueProperties {
 }
 
 /*
-queue returns details about a queue from the api
+Queue returns details about a queue from the api
 */
 func (p *Ops) Queue(vhost, queue string) QueueProperties {
 	client := p.client()
@@ -137,7 +143,7 @@ func (p *Ops) Queue(vhost, queue string) QueueProperties {
 }
 
 /*
-queues returns all the queues from a vhost along with detailed information about them
+Queues returns all the queues from a vhost along with detailed information about them
 */
 func (p *Ops) Queues(vhost string) []QueueProperties {
 	client := p.client()
@@ -146,7 +152,7 @@ func (p *Ops) Queues(vhost string) []QueueProperties {
 		panic(err.Error())
 	}
 
-	mapExtendedQueues := make([]QueueProperties, 0)
+	var mapExtendedQueues []QueueProperties
 
 	for _, q := range queues {
 		extQueue := new(QueueProperties)
@@ -163,6 +169,9 @@ func (p *Ops) Queues(vhost string) []QueueProperties {
 	return mapExtendedQueues
 }
 
+/*
+vhostSorter is responsible for sorting vhosts based on the warnings/errors they contain
+*/
 type vhostSorter struct {
 	vhosts []VhostProperties
 	less   []lessFunc
