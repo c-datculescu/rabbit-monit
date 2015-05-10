@@ -22,22 +22,29 @@ type QueueProperties struct {
 QueueStat holds a set of queue related statistics
 */
 type QueueStat struct {
-	NonPersistentMessagesCount int // the number of non-persistent messages in the queue
+	NonPersistentMessagesCount int     // the number of non-persistent messages in the queue
+	RdyReduced                 string  // ready messages in k, m, g etc
+	UnackReduced               string  // unacked messages in k, m, g etc
+	TransReduced               string  // non-durable messages in k, m, g etc
+	ConsumerReduced            string  // consumers in k, m, g etc
+	Utilisation                float64 // the utilisation converted to float64 and rounded to 2 decimals
+	EnqueueDequeueDiff         float32 // the difference between enqueue and dequeue
 }
 
 /*
 QueueAlert holds various alert flags
 */
 type QueueAlert struct {
-	State         bool // the status of the queue. will be true if the state is not "running"
-	NonDurable    bool // the durability of the queue. will be true if the queue is not durable (will not survive a server restart)
-	Rdy           bool // the number of rady messages. 1-100 = warning, >100 = error
-	Unack         bool // the number of unacknowledged messages. > ∑ consumer qos = error
-	Listener      bool // the number of consumers. 1-3 = warning, 0 = error
-	Utilisation   bool // the consumer utilisation. < 70 = warning, < 30 = error
-	Intake        bool // the diff between in and out. ∑ in, out > 1 = warning
-	NonDurableMsg bool // the number of non-durable messages. will be true if the number of non-durable messages > 1
-	Has           bool // identifies whether we have errors/warnings at all
+	State          bool // the status of the queue. will be true if the state is not "running"
+	NonDurable     bool // the durability of the queue. will be true if the queue is not durable (will not survive a server restart)
+	Rdy            bool // the number of rady messages. 1-100 = warning, >100 = error
+	Unack          bool // the number of unacknowledged messages. > ∑ consumer qos = error
+	Listener       bool // the number of consumers. 1-3 = warning, 0 = error
+	Utilisation    bool // the consumer utilisation. < 70 = warning, < 30 = error
+	Intake         bool // the diff between in and out. ∑ in, out > 1 = warning
+	ConsumptionLow bool // the diff between enqueue/dequeue is too large
+	NonDurableMsg  bool // the number of non-durable messages. will be true if the number of non-durable messages > 1
+	Has            bool // identifies whether we have errors/warnings at all
 }
 
 /*
@@ -49,7 +56,8 @@ func (qp *QueueProperties) Calculate() {
 	qp.Error = QueueAlert{}
 	qp.Warning = QueueAlert{}
 
-	qp.alertState().
+	qp.calculateStats().
+		alertState().
 		alertDurable().
 		alertRdy().
 		alertListener().
@@ -57,6 +65,25 @@ func (qp *QueueProperties) Calculate() {
 		alertIntake().
 		alertNonDurableMessages().
 		alertUnackMessages()
+}
+
+func (qp *QueueProperties) calculateStats() *QueueProperties {
+	var util float64
+	switch qp.QueueInfo.ConsumerUtilisation.(type) {
+	case string:
+		util, _ = strconv.ParseFloat(qp.QueueInfo.ConsumerUtilisation.(string), 64)
+	default:
+		util = qp.QueueInfo.ConsumerUtilisation.(float64)
+	}
+
+	qp.Stats.Utilisation = util
+
+	qp.Stats.RdyReduced = reduceInt(qp.QueueInfo.MessagesRdy)
+	qp.Stats.TransReduced = reduceInt(qp.Stats.NonPersistentMessagesCount)
+	qp.Stats.UnackReduced = reduceInt(qp.QueueInfo.MessagesUnack)
+	qp.Stats.ConsumerReduced = reduceInt(qp.QueueInfo.Consumers)
+
+	return qp
 }
 
 /*
@@ -148,7 +175,7 @@ alertNonDurableMessages raises an alert if the queue contains non-durable messag
 non-durable messages can be lost on a server restart
 */
 func (qp *QueueProperties) alertNonDurableMessages() *QueueProperties {
-	qp.Stats.NonPersistentMessagesCount = qp.QueueInfo.MessagesRam - qp.QueueInfo.MessagesPersistent
+	qp.Stats.NonPersistentMessagesCount = qp.QueueInfo.Messages - qp.QueueInfo.MessagesPersistent
 	if qp.Stats.NonPersistentMessagesCount > 0 {
 		qp.Error.Has = true
 		qp.Error.NonDurableMsg = true
@@ -199,5 +226,27 @@ func (qp *QueueProperties) alertDurable() *QueueProperties {
 		qp.Error.Has = true
 		qp.Error.NonDurable = true
 	}
+	return qp
+}
+
+/*
+alertConsumptionLow raises an alert/warning when consumption rate vs ingestion rate exceeds certain values
+
+threshold for alert is rate difference bigger than 10 and consuption is less than publishing
+
+threshold for alert is rate difference bigger than 5 and consuption is less than publishing
+*/
+func (qp *QueueProperties) alertConsumptionLow() *QueueProperties {
+	rate := qp.QueueInfo.MessageStats.PublishDetails.Rate - qp.QueueInfo.MessageStats.DeliverDetails.Rate
+	qp.Stats.EnqueueDequeueDiff = rate
+	lowerThan := qp.QueueInfo.MessageStats.DeliverDetails.Rate < qp.QueueInfo.MessageStats.PublishDetails.Rate
+	if lowerThan && rate > 10 {
+		qp.Error.Has = true
+		qp.Error.ConsumptionLow = true
+	} else if lowerThan && rate > 5 {
+		qp.Warning.Has = true
+		qp.Warning.ConsumptionLow = true
+	}
+
 	return qp
 }
